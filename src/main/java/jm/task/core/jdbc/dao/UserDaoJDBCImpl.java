@@ -8,61 +8,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-    private Connection connection = Util.getConnection();
+
 
     public UserDaoJDBCImpl() {
     }
 
+    @Override
     public void createUsersTable() {
-        PreparedStatement preparedStatement = null;
-        String sql = "CREATE TABLE IF NOT EXISTS users ( id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(40), lastName VARCHAR(40), age INT)";
+        String sql = "CREATE TABLE IF NOT EXISTS users ( id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(40), " +
+                "lastName VARCHAR(40), age INT)";
 
-        try {
-            preparedStatement = this.connection.prepareStatement(sql);
+        try (Connection connection = Util.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
-
     }
 
+    @Override
     public void dropUsersTable() {
-        PreparedStatement preparedStatement = null;
         String sql = "DROP TABLE IF EXISTS users";
 
-        try {
-            preparedStatement = this.connection.prepareStatement(sql);
+        try (Connection connection = Util.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
 
     }
 
+    @Override
     public void saveUser(String name, String lastName, byte age) {
-        PreparedStatement preparedStatement = null;
         String sql = "INSERT INTO USERS (name, lastname, age) VALUES(?,?,?)";
 
-        try {
-            preparedStatement = this.connection.prepareStatement(sql);
+        try (Connection connection = Util.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setInt(3, age);
@@ -70,51 +52,32 @@ public class UserDaoJDBCImpl implements UserDao {
             System.out.println("User c именем - " + name + " был добавлен в базу данных.");
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
 
     }
 
+    @Override
     public void removeUserById(long id) {
-        PreparedStatement preparedStatement = null;
         String sql = "DELETE FROM USERS WHERE id =" + id;
 
-        try {
-            preparedStatement = this.connection.prepareStatement(sql);
+        try (Connection connection = Util.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
-
     }
 
+    @Override
     public List<User> getAllUsers() {
         List<User> userList = new ArrayList();
         String sql = "SELECT * FROM USERS";
-        Statement statement = null;
 
-        try {
-            statement = this.connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
+        try (Connection connection = Util.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql);) {
 
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 User user = new User();
                 user.setId(resultSet.getLong("id"));
                 user.setName(resultSet.getString("name"));
@@ -126,39 +89,20 @@ public class UserDaoJDBCImpl implements UserDao {
             return userList;
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
+            return null;
         }
 
-        return null;
     }
 
+    @Override
     public void cleanUsersTable() {
-        PreparedStatement preparedStatement = null;
         String sql = "DELETE FROM USERS";
 
-        try {
-            preparedStatement = this.connection.prepareStatement(sql);
+        try (Connection connection = Util.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
-
     }
 }
